@@ -1,0 +1,86 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Intro
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold', fig.width=9, fig.height=7.5, fig.retina=2}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ggtreemap)
+library(readxl)
+library(wbgcharts)
+
+year1 <- 1990
+year2 <- 2013
+year1col <- paste0("year.",year1)
+year2col <- paste0("year.",year2)
+
+xp <- as.data.frame(read_excel('../../../Work/WBG/SDGbooklet/wdi-sdg/rfigures/data/sdg1/WDI 2017 SDG 1 data.xlsx', sheet = "1b"))
+xp <- xp[xp$year %in% c(year1, year2), c("code","year","np_190")]
+colnames(xp)[1] <- 'iso3c'
+
+# SPECIAL CASE: UZBEKISTAN. 1990 figure of 0 is questionable so use next known good
+# figure of 1998. Needs to be noted on final figure
+# From SP.POP.TOTL and Povcalnet
+np_190_uzb_1998 <- 20510000 * .4547 / 1e6
+xp[xp$iso3c == "UZB" & xp$year == 1990, "np_190"] <- np_190_uzb_1998
+
+xp$iso3c[xp$iso3c == "KSV"] <- "XKX"
+
+# Add region and make sure it's sorted correctly for palette
+xp <- xp %>% left_join(wbgref$countries$regions)
+
+# Generate max of the two years
+xp_max <- xp %>%
+group_by(region_iso3c, iso3c) %>%
+summarise(max = max(np_190))
+
+xp <- xp %>% left_join(xp_max)
+
+# Only label those with > 0.25% of the max
+np.total <- sum(xp_max$max)
+iso3c_labelled <- xp_max$iso3c[xp_max$max / np.total > 0.0025]
+
+style <- style_atlas()
+ar <- 0.75
+ggplot(xp, aes(area = np_190, layout_area = max, fill = region_iso3c, subgroup = region_iso3c)) +
+geom_rect(aes(area = max), stat = "treemap", aspect_ratio = ar, color = NA, alpha = 0.25) +
+geom_rect(stat = "treemap", aspect_ratio = ar, color = NA) +
+geom_rect(aes(area = max), stat = "treemap", aspect_ratio = ar, color = "white", fill=NA, size = 0.35) +
+geom_text(
+  aes(
+    label = ifelse(iso3c %in% iso3c_labelled, wbgref$countries$labels[iso3c], ""),
+    size = cut(max,c(0,50,100,Inf))
+  ),
+  stat = "treemap", aspect_ratio = ar,
+  color = "white",
+  family = style$theme()$text$family
+) +
+scale_size_manual(values = c(0.7,0.8,1)*style$gg_text_size, guide = "none") +
+scale_y_reverse() +
+scale_fill_manual(values = style$colors$regions, labels = wbgref$regions$labels) +
+facet_wrap(~ year) +
+style$theme() +
+guides(fill = guide_legend(nrow = 1, direction = "horizontal")) +
+labs(
+  title = "The number of people living in extreme poverty has fallen in most countries but has risen in many Sub-Saharan African countries",
+  subtitle = "People living on less than $1.90 a day (2011 PPP), 1990 and 2013",
+  caption = "Note: *Uzbekistan (1990) based on 1998 rate because of quality issues with earlier survey data.\nSource: World Bank PovcalNet; WDI (SI.POV.DDAY)."
+) +
+theme(axis.text = element_blank(), panel.grid = element_blank(),
+      legend.position = "top", strip.text = element_text(size = rel(1.2), face = "bold"))
+```
+
