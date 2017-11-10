@@ -78,27 +78,28 @@ an internal package that is (not yet) public. It's not perfect - labels should b
 when over light areas, and some of the longer country names should be split over multiple lines.
 
 ```{r, warning=FALSE, message=FALSE, fig.show='hold', fig.width=7.5, fig.height=6, fig.retina=2}
-library(wbgcharts)
-
-style <- style_atlas()
-base_plot +
-  geom_text(
-    aes(
-      label = ifelse(iso3c %in% iso3c_labelled, wbgref$countries$labels[iso3c], ""),
-      size = cut(year_max_2yr,c(0,50,100,Inf))
-    ),
-    stat = "treemap", aspect.ratio = ar,
-    color = "white",
-    family = style$theme()$text$family
-  ) +
-  scale_size_manual(values = c(0.7,0.8,1)*style$gg_text_size, guide = "none") +
-  scale_fill_manual(values = style$colors$regions, labels = wbgref$regions$labels) +
-  labs(
-    title = "The number of people living in extreme poverty has fallen in most countries but has risen in many Sub-Saharan African countries",
-    subtitle = "People living on less than $1.90 a day (2011 PPP), 1990 and 2013",
-    caption = "Note: *Uzbekistan (1990) based on 1998 rate because of quality issues with earlier survey data.\nSource: World Bank PovcalNet; WDI (SI.POV.DDAY)."
-  ) +
-  style$theme() +
-  theme(axis.text = element_blank(), panel.grid = element_blank(),
-      legend.position = "top", strip.text = element_text(size = rel(1.2), face = "bold"))
+if (require(wbgcharts)) {
+  style <- style_atlas()
+  finished_plot <- base_plot +
+    geom_text(
+      aes(
+        label = ifelse(iso3c %in% iso3c_labelled, wbgref$countries$labels[iso3c], ""),
+        size = cut(year_max_2yr,c(0,50,100,Inf))
+      ),
+      stat = "treemap", aspect.ratio = ar,
+      color = "white",
+      family = style$theme()$text$family
+    ) +
+    scale_size_manual(values = c(0.7,0.8,1)*style$gg_text_size, guide = "none") +
+    scale_fill_manual(values = style$colors$regions, labels = wbgref$regions$labels) +
+    labs(
+      title = "The number of people living in extreme poverty has fallen in most countries but has risen in many Sub-Saharan African countries",
+      subtitle = "People living on less than $1.90 a day (2011 PPP), 1990 and 2013",
+      caption = "Note: *Uzbekistan (1990) based on 1998 rate because of quality issues with earlier survey data.\nSource: World Bank PovcalNet; WDI (SI.POV.DDAY)."
+    ) +
+    style$theme() +
+    theme(axis.text = element_blank(), panel.grid = element_blank(),
+        legend.position = "top", strip.text = element_text(size = rel(1.2), face = "bold"))
+  print(finished_plot)
+}
 ```
