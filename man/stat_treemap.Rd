@@ -6,17 +6,77 @@
 \usage{
 stat_treemap(mapping = NULL, data = NULL, geom = "rect",
   position = "identity", na.rm = FALSE, show.legend = NA,
-  inherit.aes = TRUE, label.position = c(0.5, 0.5), aspect_ratio = 1, ...)
+  inherit.aes = TRUE, label.position = c(0.5, 0.5), aspect.ratio = 1, ...)
 }
 \arguments{
-\item{...}{}
+\item{mapping}{Set of aesthetic mappings created by \code{\link[=aes]{aes()}} or
+\code{\link[=aes_]{aes_()}}. If specified and \code{inherit.aes = TRUE} (the
+default), it is combined with the default mapping at the top level of the
+plot. You must supply \code{mapping} if there is no plot mapping.}
+
+\item{data}{The data to be displayed in this layer. There are three
+options:
+
+If \code{NULL}, the default, the data is inherited from the plot
+data as specified in the call to \code{\link[=ggplot]{ggplot()}}.
+
+A \code{data.frame}, or other object, will override the plot
+data. All objects will be fortified to produce a data frame. See
+\code{\link[=fortify]{fortify()}} for which variables will be created.
+
+A \code{function} will be called with a single argument,
+the plot data. The return value must be a \code{data.frame.}, and
+will be used as the layer data.}
+
+\item{geom}{The geometric object to use display the data}
+
+\item{position}{Position adjustment, either as a string, or the result of
+a call to a position adjustment function.}
+
+\item{show.legend}{logical. Should this layer be included in the legends?
+\code{NA}, the default, includes if any aesthetics are mapped.
+\code{FALSE} never includes, and \code{TRUE} always includes.
+It can also be a named logical vector to finely select the aesthetics to
+display.}
+
+\item{inherit.aes}{If \code{FALSE}, overrides the default aesthetics,
+rather than combining with them. This is most useful for helper functions
+that define both data and aesthetics and shouldn't inherit behaviour from
+the default plot specification, e.g. \code{\link[=borders]{borders()}}.}
+
+\item{label.position}{If used with a geom that uses a single x, y location (
+most likely geom_text), this determines where in each treemap box that location
+is set to, using a two element numeric vector. These are used to locate the
+point within the box.}
+
+\item{aspect.ratio}{(width / height) The standard 'squarified' algorithm aims to produce
+square-ish treemap boxes, and this aspect ratio determines what 'square-ish'
+is. If you set it to the actual aspect ratio of the output device, you will
+ensure square-ishness.}
 }
 \description{
 A stat to turn data into treemaps.
 }
 \details{
-Use with geom_rect, mostly.
+Use with \code{geom_rect}, mostly.
 }
+\section{Aesthetics}{
+
+\code{stat_treemap} accepts the following aesthetics:
+\itemize{
+\item \strong{area}: the column used to scale the drawn areas of the treemap
+\item layout_area: an optional column used for areas that will be used for layout but not drawn
+\item subgroup: a column used for grouping of areas
+}
+
+and applies the layout algorithm to produce
+
+\itemize{
+\item x, xmin, xmax
+\item y, ymin, ymax
+}
+}
+
 \examples{
 library(tidyr)
 library(dplyr)
@@ -47,6 +107,7 @@ ggplot(df, aes(area = size, fill = group, subgroup = group)) +
     nudge_x = 0.025, nudge_y = -0.025,
     fill = "white",
     stat = "treemap") +
+  scale_y_reverse() +
   theme_minimal()
 
 }

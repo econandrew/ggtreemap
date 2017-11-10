@@ -3,7 +3,7 @@
 StatTreemap <- ggproto("StatTreemap", Stat,
   required_aes = c("area"),
   default_aes = aes(layout_area = NA),
-  compute_panel = function(self, data, scales, fixed = FALSE, label.position = c(0.5, 0.5), aspect_ratio = 1) {
+  compute_panel = function(self, data, scales, fixed = FALSE, label.position = c(0.5, 0.5), aspect.ratio = 1) {
     data$id <- 1:nrow(data)
 
     # Generate treemap layout for data
@@ -11,7 +11,7 @@ StatTreemap <- ggproto("StatTreemap", Stat,
       data = data,
       area = if("layout_area" %in% names(data)) "layout_area" else "area",
       fill = "area", # we ignore this fill and merge with ggplot's own fill
-      xlim = c(0, 1*aspect_ratio),
+      xlim = c(0, 1*aspect.ratio),
       ylim = c(0, 1),
       label = "id"
     )
@@ -62,18 +62,32 @@ StatTreemap <- ggproto("StatTreemap", Stat,
 #'
 #' A stat to turn data into treemaps.
 #'
-#' Use with geom_rect, mostly.
+#' Use with \code{geom_rect}, mostly.
 #'
-#' @param mapping
-#' @param data
-#' @param geom
-#' @param position
-#' @param na.rm
-#' @param show.legend
-#' @param inherit.aes
-#' @param label.position
-#' @param aspect_ratio
-#' @param ...
+#' @section Aesthetics:
+#' \code{stat_treemap} accepts the following aesthetics:
+#' \itemize{
+#' \item \strong{area}: the column used to scale the drawn areas of the treemap
+#' \item layout_area: an optional column used for areas that will be used for layout but not drawn
+#' \item subgroup: a column used for grouping of areas
+#' }
+#'
+#' and applies the layout algorithm to produce
+#'
+#' \itemize{
+#' \item x, xmin, xmax
+#' \item y, ymin, ymax
+#' }
+#'
+#' @inheritParams ggplot2::layer
+#' @param label.position If used with a geom that uses a single x, y location (
+#' most likely geom_text), this determines where in each treemap box that location
+#' is set to, using a two element numeric vector. These are used to locate the
+#' point within the box.
+#' @param aspect.ratio (width / height) The standard 'squarified' algorithm aims to produce
+#' square-ish treemap boxes, and this aspect ratio determines what 'square-ish'
+#' is. If you set it to the actual aspect ratio of the output device, you will
+#' ensure square-ishness.
 #'
 #' @examples
 #' library(tidyr)
@@ -105,17 +119,17 @@ StatTreemap <- ggproto("StatTreemap", Stat,
 #'     nudge_x = 0.025, nudge_y = -0.025,
 #'     fill = "white",
 #'     stat = "treemap") +
-#   scale_y_reverse() +
+#'   scale_y_reverse() +
 #'   theme_minimal()
 #'
 #' @export
 stat_treemap <- function(mapping = NULL, data = NULL, geom = "rect",
                          position = "identity", na.rm = FALSE, show.legend = NA,
-                         inherit.aes = TRUE, label.position = c(0.5, 0.5), aspect_ratio = 1, ...) {
+                         inherit.aes = TRUE, label.position = c(0.5, 0.5), aspect.ratio = 1, ...) {
   layer(
     stat = StatTreemap, data = data, mapping = mapping, geom = geom,
     position = position, show.legend = show.legend, inherit.aes = inherit.aes,
     params = list(na.rm = na.rm, fixed = FALSE, label.position = label.position,
-                  aspect_ratio = aspect_ratio, ...)
+                  aspect.ratio = aspect.ratio, ...)
   )
 }
