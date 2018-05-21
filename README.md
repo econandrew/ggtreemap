@@ -1,3 +1,7 @@
+# Update
+
+For now this package depends on an exact version of `treemapify`, which may cause versioning issues. This will be fixed eventually.
+
 # `ggtreemap` - (More) treemaps for `ggplot2`
 
 This is a package for building treemaps in ggplot2. You can see the main features at
